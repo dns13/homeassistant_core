@@ -24,9 +24,7 @@ from homeassistant.components.recorder.statistics import (
     statistics_during_period,
 )
 from homeassistant.const import UnitOfEnergy
-from homeassistant.core import CALLBACK_TYPE, HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
-from homeassistant.helpers.event import async_track_point_in_utc_time
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from homeassistant.util.unit_conversion import EnergyConverter
@@ -93,10 +91,39 @@ def _build_home_data(home: tibber.TibberHome) -> TibberHomeData:
     return result
 
 
-class TibberDataCoordinator(DataUpdateCoordinator[None]):
-    """Handle Tibber data and insert statistics."""
+class TibberCoordinator[_DataT](DataUpdateCoordinator[_DataT]):
+    """Base Tibber coordinator."""
 
     config_entry: TibberConfigEntry
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        config_entry: TibberConfigEntry,
+        *,
+        name: str,
+        update_interval: timedelta,
+    ) -> None:
+        """Initialize the coordinator."""
+        super().__init__(
+            hass,
+            _LOGGER,
+            config_entry=config_entry,
+            name=name,
+            update_interval=update_interval,
+        )
+        self._runtime_data = config_entry.runtime_data
+
+    async def _async_get_client(self) -> tibber.Tibber:
+        """Get the Tibber client with error handling."""
+        try:
+            return await self._runtime_data.async_get_client(self.hass)
+        except (ClientError, TimeoutError, tibber.exceptions.HttpExceptionError) as err:
+            raise UpdateFailed(f"Unable to create Tibber client: {err}") from err
+
+
+class TibberDataCoordinator(TibberCoordinator[None]):
+    """Handle Tibber data and insert statistics."""
 
     def __init__(
         self,
@@ -107,17 +134,14 @@ class TibberDataCoordinator(DataUpdateCoordinator[None]):
         """Initialize the data handler."""
         super().__init__(
             hass,
-            _LOGGER,
-            config_entry=config_entry,
+            config_entry,
             name=f"Tibber {tibber_connection.name}",
             update_interval=timedelta(minutes=20),
         )
 
     async def _async_update_data(self) -> None:
         """Update data via API."""
-        tibber_connection = await self.config_entry.runtime_data.async_get_client(
-            self.hass
-        )
+        tibber_connection = await self._async_get_client()
 
         try:
             await tibber_connection.fetch_consumption_data_active_homes()
@@ -133,9 +157,7 @@ class TibberDataCoordinator(DataUpdateCoordinator[None]):
 
     async def _insert_statistics(self) -> None:
         """Insert Tibber statistics."""
-        tibber_connection = await self.config_entry.runtime_data.async_get_client(
-            self.hass
-        )
+        tibber_connection = await self._async_get_client()
         for home in tibber_connection.get_homes():
             sensors: list[tuple[str, bool, str | None, str]] = []
             if home.hourly_consumption_data:
@@ -255,10 +277,8 @@ class TibberDataCoordinator(DataUpdateCoordinator[None]):
                 async_add_external_statistics(self.hass, metadata, statistics)
 
 
-class TibberPriceCoordinator(DataUpdateCoordinator[dict[str, TibberHomeData]]):
-    """Handle Tibber price sensor updates."""
-
-    config_entry: TibberConfigEntry
+class TibberPriceCoordinator(TibberCoordinator[dict[str, TibberHomeData]]):
+    """Handle Tibber price data and insert statistics."""
 
     def __init__(
         self,
@@ -268,8 +288,7 @@ class TibberPriceCoordinator(DataUpdateCoordinator[dict[str, TibberHomeData]]):
         """Initialize the price coordinator."""
         super().__init__(
             hass,
-            _LOGGER,
-            config_entry=config_entry,
+            config_entry,
             name=f"{DOMAIN} price",
             update_interval=timedelta(minutes=1),
         )
@@ -324,26 +343,8 @@ class TibberPriceCoordinator(DataUpdateCoordinator[dict[str, TibberHomeData]]):
         return next_run - now
 
     async def _async_update_data(self) -> dict[str, TibberHomeData]:
-        if self._tibber_homes is None:
-            await self._fetch_data()
-
-        homes = self._tibber_homes
-        if homes is None:
-            raise UpdateFailed("No Tibber homes available")
-
-        result = {home.home_id: _build_home_data(home) for home in homes}
-
-        self.update_interval = self._time_until_next_15_minute()
-        return result
-
-    async def _fetch_data(self) -> None:
-        """Fetch latest price data via API and update cached home data."""
-        self._schedule_tomorrow_price_poll(
-            dt_util.utcnow() + timedelta(seconds=random.uniform(60, 60 * 10))
-        )
-        tibber_connection = await self.config_entry.runtime_data.async_get_client(
-            self.hass
-        )
+        """Update data via API and return per-home data for sensors."""
+        tibber_connection = await self._async_get_client()
         active_homes = tibber_connection.get_homes(only_active=True)
 
         now = dt_util.now()
@@ -408,10 +409,8 @@ class TibberFetchPriceCoordinator(TibberPriceCoordinator):
     """Backward-compatible alias for the merged price fetch coordinator."""
 
 
-class TibberDataAPICoordinator(DataUpdateCoordinator[dict[str, TibberDevice]]):
+class TibberDataAPICoordinator(TibberCoordinator[dict[str, TibberDevice]]):
     """Fetch and cache Tibber Data API device capabilities."""
-
-    config_entry: TibberConfigEntry
 
     def __init__(
         self,
@@ -421,12 +420,10 @@ class TibberDataAPICoordinator(DataUpdateCoordinator[dict[str, TibberDevice]]):
         """Initialize the coordinator."""
         super().__init__(
             hass,
-            _LOGGER,
+            entry,
             name=f"{DOMAIN} Data API",
             update_interval=timedelta(minutes=1),
-            config_entry=entry,
         )
-        self._runtime_data = entry.runtime_data
         self.sensors_by_device: dict[str, dict[str, tibber.data_api.Sensor]] = {}
 
     def _build_sensor_lookup(self, devices: dict[str, TibberDevice]) -> None:
@@ -443,15 +440,6 @@ class TibberDataAPICoordinator(DataUpdateCoordinator[dict[str, TibberDevice]]):
         if device_sensors := self.sensors_by_device.get(device_id):
             return device_sensors.get(sensor_id)
         return None
-
-    async def _async_get_client(self) -> tibber.Tibber:
-        """Get the Tibber client with error handling."""
-        try:
-            return await self._runtime_data.async_get_client(self.hass)
-        except ConfigEntryAuthFailed:
-            raise
-        except (ClientError, TimeoutError, tibber.UserAgentMissingError) as err:
-            raise UpdateFailed(f"Unable to create Tibber client: {err}") from err
 
     async def _async_setup(self) -> None:
         """Initial load of Tibber Data API devices."""
