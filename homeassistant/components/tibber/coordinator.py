@@ -205,16 +205,21 @@ class TibberDataCoordinator(TibberCoordinator[None]):
                     # of consumption/production data.
                     # We update the statistics with the last 30 days
                     # of data to handle corrections in the data.
+                    # Additionally, the last 24h of statistics are overwritten
+                    # from the new data to pick up corrections in already
+                    # ingested hours.
                     hourly_data = (
                         home.hourly_production_data
                         if is_production
                         else home.hourly_consumption_data
                     )
 
-                    from_time = dt_util.parse_datetime(hourly_data[0]["from"])
-                    if from_time is None:
-                        continue
-                    start = from_time - timedelta(hours=1)
+                    last_stat_start = dt_util.utc_from_timestamp(
+                        last_stats[statistic_id][0]["start"]
+                    )
+                    # Go back 24h so existing statistics within the last day
+                    # get overwritten by the new data.
+                    start = last_stat_start - timedelta(hours=24)
                     stat = await get_instance(self.hass).async_add_executor_job(
                         statistics_during_period,
                         self.hass,
