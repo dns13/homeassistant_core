@@ -208,10 +208,12 @@ class TibberDataCoordinator(TibberCoordinator[None]):
                     # Additionally, the last 24h of statistics are overwritten
                     # from the new data to pick up corrections in already
                     # ingested hours.
-                    hourly_data = (
-                        home.hourly_production_data
-                        if is_production
-                        else home.hourly_consumption_data
+                    # Always refresh historic data from the API instead of
+                    # relying on cached hourly data in the Tibber client,
+                    # as corrected values may otherwise remain stale until
+                    # the config entry is reloaded.
+                    hourly_data = await home.get_historic_data(
+                        30 * 24, production=is_production
                     )
 
                     last_stat_start = dt_util.utc_from_timestamp(
