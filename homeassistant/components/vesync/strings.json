@@ -73,8 +73,20 @@
       }
     },
     "number": {
+      "horizontal_oscillation_left": {
+        "name": "Horizontal oscillation left angle"
+      },
+      "horizontal_oscillation_right": {
+        "name": "Horizontal oscillation right angle"
+      },
       "mist_level": {
         "name": "Mist level"
+      },
+      "vertical_oscillation_bottom": {
+        "name": "Vertical oscillation bottom angle"
+      },
+      "vertical_oscillation_top": {
+        "name": "Vertical oscillation top angle"
       }
     },
     "select": {
