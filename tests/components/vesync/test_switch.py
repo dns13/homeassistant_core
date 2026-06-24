@@ -168,6 +168,19 @@ async def test_turn_on_off_display_raises_error(
             SERVICE_TURN_OFF,
             "pyvesync.devices.vesynchumidifier.VeSyncSuperior6000S.toggle_drying_mode",
         ),
+        # mute switch for fan
+        (
+            "SmartTowerFan",
+            "switch.smarttowerfan_mute",
+            SERVICE_TURN_ON,
+            "pyvesync.devices.vesyncfan.VeSyncTowerFan.toggle_mute",
+        ),
+        (
+            "SmartTowerFan",
+            "switch.smarttowerfan_mute",
+            SERVICE_TURN_OFF,
+            "pyvesync.devices.vesyncfan.VeSyncTowerFan.toggle_mute",
+        ),
     ],
 )
 async def test_switch_operations(

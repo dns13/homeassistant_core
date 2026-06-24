@@ -7,7 +7,12 @@ from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 
-from .common import ALL_DEVICE_NAMES, ENTITY_HUMIDIFIER_HUMIDITY, mock_devices_response
+from .common import (
+    ALL_DEVICE_NAMES,
+    ENTITY_FAN_TEMPERATURE,
+    ENTITY_HUMIDIFIER_HUMIDITY,
+    mock_devices_response,
+)
 
 from tests.common import MockConfigEntry
 from tests.test_util.aiohttp import AiohttpClientMocker
@@ -57,3 +62,12 @@ async def test_humidity(
     """Test the state of humidity sensor entity."""
 
     assert hass.states.get(ENTITY_HUMIDIFIER_HUMIDITY).state == "35"
+
+
+async def test_fan_temperature(
+    hass: HomeAssistant, fan_config_entry: MockConfigEntry
+) -> None:
+    """Test the state of the fan temperature sensor entity."""
+
+    # 72 °F reported by the device converted to the metric test system (°C).
+    assert hass.states.get(ENTITY_FAN_TEMPERATURE).state == "22.2222222222222"
