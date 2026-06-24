@@ -224,6 +224,18 @@ SENSORS: tuple[VeSyncSensorEntityDescription, ...] = (
         value_fn=lambda device: device.state.preheat_set_time,
         exists_fn=is_air_fryer,
     ),
+    VeSyncSensorEntityDescription(
+        key="sleep_preference_type",
+        translation_key="sleep_preference_type",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda device: device.state.sleep_preference_type,
+        exists_fn=(
+            lambda device: (
+                is_fan(device)
+                and rgetattr(device, "state.sleep_preference_type") is not None
+            )
+        ),
+    ),
 )
 
 

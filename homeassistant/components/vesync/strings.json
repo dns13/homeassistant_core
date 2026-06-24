@@ -39,6 +39,9 @@
   },
   "entity": {
     "binary_sensor": {
+      "sleep_oscillation": {
+        "name": "Sleep mode oscillation"
+      },
       "water_lacks": {
         "name": "Low water"
       },
@@ -149,6 +152,9 @@
       },
       "preheat_set_time": {
         "name": "Preheating set time"
+      },
+      "sleep_preference_type": {
+        "name": "Sleep preference type"
       }
     },
     "switch": {

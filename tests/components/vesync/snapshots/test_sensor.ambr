@@ -2205,6 +2205,41 @@
         None,
       ]),
       'area_id': None,
+      'capabilities': None,
+      'config_entry_id': <ANY>,
+      'config_subentry_id': <ANY>,
+      'device_class': None,
+      'device_id': <ANY>,
+      'disabled_by': None,
+      'domain': 'sensor',
+      'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+      'entity_id': 'sensor.smarttowerfan_sleep_preference_type',
+      'has_entity_name': True,
+      'hidden_by': None,
+      'icon': None,
+      'id': <ANY>,
+      'labels': set({
+      }),
+      'name': None,
+      'object_id_base': 'Sleep preference type',
+      'options': dict({
+      }),
+      'original_device_class': None,
+      'original_icon': None,
+      'original_name': 'Sleep preference type',
+      'platform': 'vesync',
+      'previous_unique_id': None,
+      'suggested_object_id': None,
+      'supported_features': 0,
+      'translation_key': 'sleep_preference_type',
+      'unique_id': 'smarttowerfan-sleep_preference_type',
+      'unit_of_measurement': None,
+    }),
+    EntityRegistryEntrySnapshot({
+      'aliases': list([
+        None,
+      ]),
+      'area_id': None,
       'capabilities': dict({
         <SensorEntityCapabilityAttribute.STATE_CLASS: 'state_class'>: <SensorStateClass.MEASUREMENT: 'measurement'>,
       }),
@@ -2241,6 +2276,19 @@
       'unit_of_measurement': <UnitOfTemperature.CELSIUS: '°C'>,
     }),
   ])
+# ---
+# name: test_sensor_state[SmartTowerFan][sensor.smarttowerfan_sleep_preference_type]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'SmartTowerFan Sleep preference type',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.smarttowerfan_sleep_preference_type',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': '1',
+  })
 # ---
 # name: test_sensor_state[SmartTowerFan][sensor.smarttowerfan_temperature]
   StateSnapshot({

@@ -13,11 +13,12 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .common import rgetattr
+from .common import is_fan, rgetattr
 from .const import VS_DEVICES, VS_DISCOVERY
 from .coordinator import VesyncConfigEntry, VeSyncDataCoordinator
 from .entity import VeSyncBaseEntity
@@ -50,6 +51,18 @@ SENSOR_DESCRIPTIONS: tuple[VeSyncBinarySensorEntityDescription, ...] = (
         device_class=BinarySensorDeviceClass.PROBLEM,
         exists_fn=(
             lambda device: rgetattr(device, "state.water_tank_lifted") is not None
+        ),
+    ),
+    VeSyncBinarySensorEntityDescription(
+        key="sleep_oscillation",
+        translation_key="sleep_oscillation",
+        is_on=lambda device: device.state.sleep_oscillation_switch == "on",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        exists_fn=(
+            lambda device: (
+                is_fan(device)
+                and rgetattr(device, "state.sleep_oscillation_switch") is not None
+            )
         ),
     ),
 )

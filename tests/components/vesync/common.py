@@ -15,6 +15,8 @@ ENTITY_HUMIDIFIER_300S_NIGHT_LIGHT_SELECT = "select.humidifier_300s_night_light_
 
 ENTITY_FAN = "fan.SmartTowerFan"
 ENTITY_FAN_TEMPERATURE = "sensor.smarttowerfan_temperature"
+ENTITY_FAN_SLEEP_PREFERENCE = "sensor.smarttowerfan_sleep_preference_type"
+ENTITY_FAN_SLEEP_OSCILLATION = "binary_sensor.smarttowerfan_sleep_mode_oscillation"
 
 ENTITY_SWITCH_DISPLAY = "switch.humidifier_200s_display"
 

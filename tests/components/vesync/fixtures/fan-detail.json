@@ -22,8 +22,8 @@
       "temperature": 72,
       "errorCode": 0,
       "sleepPreference": {
-        "sleepPreferenceType": 0,
-        "oscillationSwitch": 0,
+        "sleepPreferenceType": 1,
+        "oscillationSwitch": 1,
         "fallAsleepRemain": 0,
         "autoChangeFanLevelSwitch": 0
       },

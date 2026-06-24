@@ -7,7 +7,11 @@ from homeassistant.components.binary_sensor import DOMAIN as BINARY_SENSOR_DOMAI
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 
-from .common import ALL_DEVICE_NAMES, mock_devices_response
+from .common import (
+    ALL_DEVICE_NAMES,
+    ENTITY_FAN_SLEEP_OSCILLATION,
+    mock_devices_response,
+)
 
 from tests.common import MockConfigEntry
 from tests.test_util.aiohttp import AiohttpClientMocker
@@ -49,3 +53,11 @@ async def test_sensor_state(
     # Check states
     for entity in entities:
         assert hass.states.get(entity.entity_id) == snapshot(name=entity.entity_id)
+
+
+async def test_fan_sleep_oscillation(
+    hass: HomeAssistant, fan_config_entry: MockConfigEntry
+) -> None:
+    """Test the state of the fan sleep mode oscillation binary sensor entity."""
+
+    assert hass.states.get(ENTITY_FAN_SLEEP_OSCILLATION).state == "on"

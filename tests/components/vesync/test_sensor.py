@@ -9,6 +9,7 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 from .common import (
     ALL_DEVICE_NAMES,
+    ENTITY_FAN_SLEEP_PREFERENCE,
     ENTITY_FAN_TEMPERATURE,
     ENTITY_HUMIDIFIER_HUMIDITY,
     mock_devices_response,
@@ -71,3 +72,11 @@ async def test_fan_temperature(
 
     # 72 °F reported by the device converted to the metric test system (°C).
     assert hass.states.get(ENTITY_FAN_TEMPERATURE).state == "22.2222222222222"
+
+
+async def test_fan_sleep_preference_type(
+    hass: HomeAssistant, fan_config_entry: MockConfigEntry
+) -> None:
+    """Test the state of the fan sleep preference type sensor entity."""
+
+    assert hass.states.get(ENTITY_FAN_SLEEP_PREFERENCE).state == "1"
