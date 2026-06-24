@@ -1,12 +1,14 @@
 """Tests for the fan module."""
 
 from contextlib import nullcontext
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from pyvesync.base_devices import VeSyncFanBase
 from syrupy.assertion import SnapshotAssertion
 
 from homeassistant.components.fan import ATTR_PRESET_MODE, DOMAIN as FAN_DOMAIN
+from homeassistant.components.vesync.fan import VeSyncFanHA
 from homeassistant.const import ATTR_ENTITY_ID, SERVICE_TURN_OFF, SERVICE_TURN_ON
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
@@ -181,6 +183,58 @@ async def test_set_preset_mode(
         await hass.async_block_till_done()
         method_mock.assert_called_once()
         update_mock.assert_called_once()
+
+
+def _mock_fan_device(*, modes: list[str], mode: str, fan_level: int | None) -> Mock:
+    """Build a mock VeSync fan device for direct entity testing."""
+    return Mock(
+        VeSyncFanBase,
+        cid="fan",
+        device_name="Test Fan",
+        device_type="LPF-R432S-AEU",
+        current_firm_version="1.0.0",
+        sub_device_no=0,
+        is_on=True,
+        modes=modes,
+        fan_levels=list(range(1, 13)),
+        set_mode=AsyncMock(return_value=True),
+        state=Mock(mode=mode, fan_level=fan_level, oscillation_status=None),
+    )
+
+
+@pytest.mark.parametrize(
+    ("mode", "fan_level", "expected"),
+    [
+        pytest.param("manual", 1, 8, id="manual_lowest"),
+        pytest.param("normal", 12, 100, id="normal_highest"),
+        pytest.param("normal", 0, 0, id="off"),
+        pytest.param("normal", -1, None, id="out_of_range"),
+        pytest.param("normal", None, None, id="missing"),
+        pytest.param("auto", 6, None, id="non_speed_mode"),
+    ],
+)
+def test_percentage(mode: str, fan_level: int | None, expected: int | None) -> None:
+    """Test percentage handles out-of-range/missing fan levels without raising."""
+    device = _mock_fan_device(
+        modes=["normal", "manual"], mode=mode, fan_level=fan_level
+    )
+    fan = VeSyncFanHA(device, Mock())
+
+    assert fan.percentage == expected
+
+
+async def test_set_preset_mode_eco() -> None:
+    """Test the eco preset is exposed and sets the mode via set_mode."""
+    device = _mock_fan_device(modes=["normal", "eco"], mode="eco", fan_level=-1)
+    fan = VeSyncFanHA(device, Mock())
+
+    assert "eco" in fan.preset_modes
+    assert fan.preset_mode == "eco"
+
+    with patch.object(fan, "async_write_ha_state"):
+        await fan.async_set_preset_mode("eco")
+
+    device.set_mode.assert_awaited_once_with("eco")
 
 
 @pytest.mark.parametrize(
