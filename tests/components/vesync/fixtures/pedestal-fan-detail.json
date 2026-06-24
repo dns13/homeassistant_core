@@ -1,0 +1,28 @@
+{
+  "traceId": "0000000000",
+  "code": 0,
+  "msg": "request success",
+  "module": null,
+  "stacktrace": null,
+  "result": {
+    "traceId": "0000000000",
+    "code": 0,
+    "result": {
+      "powerSwitch": 1,
+      "workMode": "normal",
+      "fanSpeedLevel": 1,
+      "temperature": 720,
+      "muteSwitch": 0,
+      "muteState": 0,
+      "screenState": 1,
+      "screenSwitch": 1,
+      "horizontalOscillationState": 1,
+      "verticalOscillationState": 0,
+      "childLock": 0,
+      "errorCode": 0,
+      "oscillationCoordinate": null,
+      "oscillationRange": null,
+      "sleepPreference": null
+    }
+  }
+}

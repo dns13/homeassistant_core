@@ -82,6 +82,32 @@ def _toggle_mute(device: VeSyncBaseDevice, target: bool) -> Awaitable[bool]:
             raise HomeAssistantError("Device does not support toggling mute.")
 
 
+def _toggle_vertical_oscillation(
+    device: VeSyncBaseDevice, target: bool
+) -> Awaitable[bool]:
+    """Toggle vertical oscillation on fan devices."""
+    match device:
+        case VeSyncFanBase() as sw if sw.supports_vertical_oscillation:
+            return sw.toggle_vertical_oscillation(target)
+        case _:
+            raise HomeAssistantError(
+                "Device does not support toggling vertical oscillation."
+            )
+
+
+def _toggle_horizontal_oscillation(
+    device: VeSyncBaseDevice, target: bool
+) -> Awaitable[bool]:
+    """Toggle horizontal oscillation on fan devices."""
+    match device:
+        case VeSyncFanBase() as sw if sw.supports_horizontal_oscillation:
+            return sw.toggle_horizontal_oscillation(target)
+        case _:
+            raise HomeAssistantError(
+                "Device does not support toggling horizontal oscillation."
+            )
+
+
 @dataclass(frozen=True, kw_only=True)
 class VeSyncSwitchEntityDescription(SwitchEntityDescription):
     """A class that describes custom switch entities."""
@@ -148,6 +174,32 @@ SENSOR_DESCRIPTIONS: Final[tuple[VeSyncSwitchEntityDescription, ...]] = (
         translation_key="mute",
         on_fn=lambda device: _toggle_mute(device, True),
         off_fn=lambda device: _toggle_mute(device, False),
+        entity_category=EntityCategory.CONFIG,
+    ),
+    VeSyncSwitchEntityDescription(
+        key="vertical_oscillation",
+        is_on=(
+            lambda device: device.state.vertical_oscillation_status == DeviceStatus.ON
+        ),
+        exists_fn=(
+            lambda device: is_fan(device) and device.supports_vertical_oscillation
+        ),
+        translation_key="vertical_oscillation",
+        on_fn=lambda device: _toggle_vertical_oscillation(device, True),
+        off_fn=lambda device: _toggle_vertical_oscillation(device, False),
+        entity_category=EntityCategory.CONFIG,
+    ),
+    VeSyncSwitchEntityDescription(
+        key="horizontal_oscillation",
+        is_on=(
+            lambda device: device.state.horizontal_oscillation_status == DeviceStatus.ON
+        ),
+        exists_fn=(
+            lambda device: is_fan(device) and device.supports_horizontal_oscillation
+        ),
+        translation_key="horizontal_oscillation",
+        on_fn=lambda device: _toggle_horizontal_oscillation(device, True),
+        off_fn=lambda device: _toggle_horizontal_oscillation(device, False),
         entity_category=EntityCategory.CONFIG,
     ),
 )

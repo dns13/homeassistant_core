@@ -181,6 +181,32 @@ async def test_turn_on_off_display_raises_error(
             SERVICE_TURN_OFF,
             "pyvesync.devices.vesyncfan.VeSyncTowerFan.toggle_mute",
         ),
+        # vertical oscillation switch for pedestal fan
+        (
+            "SmartPedestalFan",
+            "switch.smartpedestalfan_vertical_oscillation",
+            SERVICE_TURN_ON,
+            "pyvesync.devices.vesyncfan.VeSyncPedestalFan.toggle_vertical_oscillation",
+        ),
+        (
+            "SmartPedestalFan",
+            "switch.smartpedestalfan_vertical_oscillation",
+            SERVICE_TURN_OFF,
+            "pyvesync.devices.vesyncfan.VeSyncPedestalFan.toggle_vertical_oscillation",
+        ),
+        # horizontal oscillation switch for pedestal fan
+        (
+            "SmartPedestalFan",
+            "switch.smartpedestalfan_horizontal_oscillation",
+            SERVICE_TURN_ON,
+            "pyvesync.devices.vesyncfan.VeSyncPedestalFan.toggle_horizontal_oscillation",
+        ),
+        (
+            "SmartPedestalFan",
+            "switch.smartpedestalfan_horizontal_oscillation",
+            SERVICE_TURN_OFF,
+            "pyvesync.devices.vesyncfan.VeSyncPedestalFan.toggle_horizontal_oscillation",
+        ),
     ],
 )
 async def test_switch_operations(

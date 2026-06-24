@@ -152,8 +152,14 @@
       "drying_mode_power_off": {
         "name": "Enable drying mode while power is off"
       },
+      "horizontal_oscillation": {
+        "name": "Horizontal oscillation"
+      },
       "mute": {
         "name": "Mute"
+      },
+      "vertical_oscillation": {
+        "name": "Vertical oscillation"
       }
     }
   },

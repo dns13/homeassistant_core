@@ -188,6 +188,21 @@
       },
       {
         "deviceRegion": "US",
+        "isOwner": true,
+        "cid": "smartpedestalfan",
+        "deviceType": "LPF-R432S-AUS",
+        "deviceName": "SmartPedestalFan",
+        "deviceImg": "",
+        "type": "",
+        "connectionType": "",
+        "subDeviceNo": null,
+        "deviceStatus": "on",
+        "connectionStatus": "online",
+        "uuid": "00000000-1111-2222-3333-555555555555",
+        "configModule": "configModule"
+      },
+      {
+        "deviceRegion": "US",
         "isOwner": false,
         "authKey": null,
         "deviceName": "Humidifier 6000s",

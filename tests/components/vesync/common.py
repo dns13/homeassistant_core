@@ -75,6 +75,9 @@ DEVICE_FIXTURES: dict[str, list[tuple[str, str, str]]] = {
         ("post", "/cloud/v1/deviceManaged/deviceDetail", "dimmer-detail.json")
     ],
     "SmartTowerFan": [("post", "/cloud/v2/deviceManaged/bypassV2", "fan-detail.json")],
+    "SmartPedestalFan": [
+        ("post", "/cloud/v2/deviceManaged/bypassV2", "pedestal-fan-detail.json")
+    ],
     "Humidifier 6000s": [
         ("post", "/cloud/v2/deviceManaged/bypassV2", "humidifier-6000s-detail.json")
     ],
